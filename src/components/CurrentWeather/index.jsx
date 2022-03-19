@@ -5,7 +5,7 @@ export function CurrentWeather() {
   const [data, setData] = useState({});
   const [activities, setActivities] = useState([]);
   const [location, setLocation] = useState("Anapolis");
-  const [filter, setFilter] = useState({});
+  const [filter, setFilter] = useState([]);
 
   const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&appid=0ac97b448704a8c95bcec812c95ac3b9&lang=pt_br`;
 
@@ -25,18 +25,16 @@ export function CurrentWeather() {
     axios.get(weatherUrl).then((response) => {
       setData(response.data);
     });
-  }, [location]);
-
-  useEffect(() => {
     axios.get(activitiesUrl).then((response) => {
       setActivities(response.data);
     });
-  }, [location]);
 
-  const filterActivities = activities.filter(
-    (activity) =>
-      activity.suggested_weather_conditions === data.weather[0].main
-  );
+    const filterActivities = activities.filter(
+      (activity) =>
+        activity.suggested_weather_conditions === data.weather[0].main
+    );
+    setFilter(filterActivities)
+  }, [location, data]);
 
   return (
     <div className="app">
@@ -88,8 +86,8 @@ export function CurrentWeather() {
         )}
 
         <div>
-          {filterActivities.map((activity) => {
-            return <p>{activity.activity_title}</p>;
+          {filter.map((activity) => {
+            return <p key={activity.id}>{activity.activity_title}</p>;
           })}
         </div>
       </div>
