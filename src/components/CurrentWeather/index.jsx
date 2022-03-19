@@ -1,12 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import axios from "axios";
-
+import Switch from "react-switch";
+import { ThemeContext } from "styled-components";
+import { shade } from "polished";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import SearchIcon from "@mui/icons-material/Search";
+import PlaceIcon from '@mui/icons-material/Place';
 import { Container } from "./styles";
 
-export function CurrentWeather() {
+export function CurrentWeather({ toggleTheme, darkMode }) {
+  const { colors, title } = useContext(ThemeContext);
   const [data, setData] = useState({});
   const [activities, setActivities] = useState([]);
-  const [location, setLocation] = useState("Anapolis");
+  const [location, setLocation] = useState("São Paulo");
   const [filter, setFilter] = useState([]);
 
   const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&appid=0ac97b448704a8c95bcec812c95ac3b9&lang=pt_br`;
@@ -26,62 +33,76 @@ export function CurrentWeather() {
       (activity) =>
         activity.suggested_weather_conditions === data.weather[0].main
     );
-    setFilter(filterActivities)
+    setFilter(filterActivities);
   }, [location, data]);
 
   return (
     <Container>
-      <div className="searchBar">
-        <input
-          value={location}
-          onChange={(event) => setLocation(event.target.value)}
-          placeholder="Local"
-          type="text"
-        />
-      </div>
-      <div className="container">
-        <div className="top">
-          <div className="location">
-            {data.name ? (
-              <h1>{data.name}</h1>
-            ) : (
-              <h1 className="start">Para começar, informe o local desejado</h1>
-            )}
-          </div>
-          <div>{data.sys ? <p>{data.sys.country}</p> : null}</div>
-
-          <div className="temp">
-            {data.main ? <h1>{data.main.temp.toFixed()}°C</h1> : null}
-          </div>
-          <div className="description">
-            {data.weather ? (
-              <p>
-                {data.weather[0].description.charAt(0).toUpperCase() +
-                  data.weather[0].description.slice(1)}
-              </p>
-            ) : null}
-          </div>
+      <div className={`header ${darkMode ? "darkMode" : ""}`}>
+        <div className="headerBox">
+          <h1 className="logo">weather<strong>.app</strong></h1>
+          <Switch
+            className="switch"
+            onChange={toggleTheme}
+            checked={title === "dark"}
+            checkedIcon={<LightModeIcon />}
+            uncheckedIcon={<DarkModeIcon className="light" />}
+            activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+            height={25}
+            width={50}
+            handleDiameter={20}
+            offColor={shade(0.15, colors.primary)}
+            onColor={colors.secundary}
+          />
         </div>
-
-        {data.name !== undefined && (
-          <div className="bottom">
-            <div className="feels">
-              {data.main ? (
-                <p className="bold">{data.main.feels_like.toFixed()}°C</p>
-              ) : null}
-              <p>Sensação Térmica</p>
+      </div>
+      <div className="content">
+        <div className="searchBarBox">
+          <SearchIcon />
+          <input
+            className="searchBar"
+            value={location}
+            onChange={(event) => setLocation(event.target.value)}
+            placeholder="Local"
+            type="text"
+          />
+        </div>
+        <div>
+          <div className="boxTemp">
+            <div>
+              <div >{data.name ? <div className="name"><PlaceIcon fontSize="large"/><h1>{data.name}</h1></div> : null}</div>
+              <div className="country">{data.sys ? <p>{data.sys.country}</p> : null}</div>
             </div>
-            <div className="humidity">
-              {data.main ? <p className="bold">{data.main.humidity}%</p> : null}
-              <p>Umidade</p>
+            <div className="temp">
+              {data.main ? <h1>{data.main.temp.toFixed()}°C</h1> : null}
+              <div>
+                {data.weather ? (
+                  <p>
+                    {data.weather[0].main.charAt(0).toUpperCase() +
+                      data.weather[0].main.slice(1)}
+                  </p>
+                ) : null}
+              </div>
             </div>
           </div>
-        )}
 
-        <div>
-          {filter.map((activity) => {
-            return <p key={activity.id}>{activity.activity_title}</p>;
-          })}
+          {data.name !== undefined && (
+            <div className="boxDetails">
+              <div className="text">
+                {data.main ? <p><strong>Feels like:</strong> {data.main.feels_like.toFixed()}°C</p> : null}
+              </div>
+              <div className="text">
+                {data.main ? <p><strong>Humidity:</strong> {data.main.humidity}%</p> : null}
+              </div>
+            </div>
+          )}
+
+          <div className="activities">
+            <h2>Recommended activities:</h2>
+            {filter.map((activity) => {
+              return <p key={activity.id}>{activity.activity_title}</p>;
+            })}
+          </div>
         </div>
       </div>
     </Container>

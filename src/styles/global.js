@@ -1,6 +1,13 @@
 import { createGlobalStyle } from "styled-components";
 
 export const GlobalStyle = createGlobalStyle`
+    :root{
+        --dark-mode-elements: hsl(209, 23%, 22%);
+        --dark-mode-bg: hsl(207, 26%, 17%);
+        --light-mode-elements: #fff;
+        --light-mode-bg: hsl(0, 0%, 98%);
+    }
+
     * {
         margin: 0;
         padding: 0;
@@ -19,7 +26,7 @@ export const GlobalStyle = createGlobalStyle`
 
     body{
         -webkit-font-smoothing: antialiased;
-        background: #22262B;
-        color: #fff;
+        background: ${(props) => props.theme.colors.background};
+        color: ${(props) => props.theme.colors.text};
     }
 `;
