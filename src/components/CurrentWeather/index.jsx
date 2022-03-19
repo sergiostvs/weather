@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+import { Container } from "./styles";
+
 export function CurrentWeather() {
   const [data, setData] = useState({});
   const [activities, setActivities] = useState([]);
@@ -11,15 +13,6 @@ export function CurrentWeather() {
 
   const activitiesUrl =
     "https://raw.githubusercontent.com/probono-digital/DesafioTecnico/main/MOCK_DATA.json";
-
-  // const searchLocation = (event) => {
-  //   if (event.key === "Enter") {
-  //     axios.get(url).then((response) => {
-  //       setData(response.data);
-  //     });
-  //     setLocation("");
-  //   }
-  // };
 
   useEffect(() => {
     axios.get(weatherUrl).then((response) => {
@@ -37,8 +30,8 @@ export function CurrentWeather() {
   }, [location, data]);
 
   return (
-    <div className="app">
-      <div className="search">
+    <Container>
+      <div className="searchBar">
         <input
           value={location}
           onChange={(event) => setLocation(event.target.value)}
@@ -91,6 +84,6 @@ export function CurrentWeather() {
           })}
         </div>
       </div>
-    </div>
+    </Container>
   );
 }
