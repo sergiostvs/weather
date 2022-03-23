@@ -17,14 +17,14 @@ export function CurrentWeather({ toggleTheme, darkMode }) {
   const [coordinates, setCoordinates] = useState({});
   const [filter, setFilter] = useState([]);
 
-  const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&appid=23f360e1bb22ff33872583f99ea22ed7&lang=pt_br`;
-  const weatherUrlCoords = `https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.latitude}&lon=${coordinates.longitude}&units=metric&appid=23f360e1bb22ff33872583f99ea22ed7&lang=pt_br`;
+  const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&appid=b2a40f5e2790d4e2c5ce115e26cf370e&lang=pt_br`;
 
   const activitiesUrl =
     "https://raw.githubusercontent.com/probono-digital/DesafioTecnico/main/MOCK_DATA.json";
 
   useEffect(() => {
-    axios.get(weatherUrlCoords).then((response) => {
+    navigator.geolocation.watchPosition(handlePositionReceived);
+    axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.latitude}&lon=${coordinates.longitude}&units=metric&appid=b2a40f5e2790d4e2c5ce115e26cf370e&lang=pt_br`).then((response) => {
       setData(response.data);
     });
   }, [coordinates]);
@@ -45,10 +45,6 @@ export function CurrentWeather({ toggleTheme, darkMode }) {
     );
     setFilter(filterActivities);
   }, [data]);
-
-  useEffect(() => {
-    navigator.geolocation.watchPosition(handlePositionReceived);
-  }, []);
 
   function handlePositionReceived({ coords }) {
     const { latitude, longitude } = coords;
