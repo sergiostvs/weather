@@ -6,20 +6,28 @@ import { shade } from "polished";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import SearchIcon from "@mui/icons-material/Search";
-import PlaceIcon from '@mui/icons-material/Place';
+import PlaceIcon from "@mui/icons-material/Place";
 import { Container } from "./styles";
 
 export function CurrentWeather({ toggleTheme, darkMode }) {
   const { colors, title } = useContext(ThemeContext);
   const [data, setData] = useState({});
   const [activities, setActivities] = useState([]);
-  const [location, setLocation] = useState("São Paulo");
+  const [location, setLocation] = useState("");
+  const [coordinates, setCoordinates] = useState({});
   const [filter, setFilter] = useState([]);
 
-  const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&appid=0ac97b448704a8c95bcec812c95ac3b9&lang=pt_br`;
+  const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&appid=23f360e1bb22ff33872583f99ea22ed7&lang=pt_br`;
+  const weatherUrlCoords = `https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.latitude}&lon=${coordinates.longitude}&units=metric&appid=23f360e1bb22ff33872583f99ea22ed7&lang=pt_br`;
 
   const activitiesUrl =
     "https://raw.githubusercontent.com/probono-digital/DesafioTecnico/main/MOCK_DATA.json";
+
+  useEffect(() => {
+    axios.get(weatherUrlCoords).then((response) => {
+      setData(response.data);
+    });
+  }, [coordinates]);
 
   useEffect(() => {
     axios.get(weatherUrl).then((response) => {
@@ -28,19 +36,32 @@ export function CurrentWeather({ toggleTheme, darkMode }) {
     axios.get(activitiesUrl).then((response) => {
       setActivities(response.data);
     });
+  }, [location]);
 
+  useEffect(() => {
     const filterActivities = activities.filter(
       (activity) =>
         activity.suggested_weather_conditions === data.weather[0].main
     );
     setFilter(filterActivities);
-  }, [location, data]);
+  }, [data]);
+
+  useEffect(() => {
+    navigator.geolocation.watchPosition(handlePositionReceived);
+  }, []);
+
+  function handlePositionReceived({ coords }) {
+    const { latitude, longitude } = coords;
+    setCoordinates({ latitude, longitude });
+  }
 
   return (
     <Container>
       <div className={`header ${darkMode ? "darkMode" : ""}`}>
         <div className="headerBox">
-          <h1 className="logo">weather<strong>.app</strong></h1>
+          <h1 className="logo">
+            weather<strong>.app</strong>
+          </h1>
           <Switch
             className="switch"
             onChange={toggleTheme}
@@ -62,7 +83,9 @@ export function CurrentWeather({ toggleTheme, darkMode }) {
           <input
             className="searchBar"
             value={location}
-            onChange={(event) => setLocation(event.target.value)}
+            onChange={(event) => {
+              setLocation(event.target.value);
+            }}
             placeholder="Local"
             type="text"
           />
@@ -70,8 +93,17 @@ export function CurrentWeather({ toggleTheme, darkMode }) {
         <div>
           <div className="boxTemp">
             <div>
-              <div >{data.name ? <div className="name"><PlaceIcon fontSize="large"/><h1>{data.name}</h1></div> : null}</div>
-              <div className="country">{data.sys ? <p>{data.sys.country}</p> : null}</div>
+              <div>
+                {data.name ? (
+                  <div className="name">
+                    <PlaceIcon fontSize="large" />
+                    <h1>{data.name}</h1>
+                  </div>
+                ) : null}
+              </div>
+              <div className="country">
+                {data.sys ? <p>{data.sys.country}</p> : null}
+              </div>
             </div>
             <div className="temp">
               {data.main ? <h1>{data.main.temp.toFixed()}°C</h1> : null}
@@ -89,10 +121,19 @@ export function CurrentWeather({ toggleTheme, darkMode }) {
           {data.name !== undefined && (
             <div className="boxDetails">
               <div className="text">
-                {data.main ? <p><strong>Feels like:</strong> {data.main.feels_like.toFixed()}°C</p> : null}
+                {data.main ? (
+                  <p>
+                    <strong>Feels like:</strong>{" "}
+                    {data.main.feels_like.toFixed()}°C
+                  </p>
+                ) : null}
               </div>
               <div className="text">
-                {data.main ? <p><strong>Humidity:</strong> {data.main.humidity}%</p> : null}
+                {data.main ? (
+                  <p>
+                    <strong>Humidity:</strong> {data.main.humidity}%
+                  </p>
+                ) : null}
               </div>
             </div>
           )}
